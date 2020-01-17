@@ -1,2 +1,2 @@
 # aliJSpress
-Shop AliJSpree
+Shop AliJSpress
