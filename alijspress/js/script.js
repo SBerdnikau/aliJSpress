@@ -4,7 +4,10 @@ document.addEventListener('DOMContentLoaded', () => {
         cartBtn = document.getElementById('cart'),
         wishlistBtn = document.getElementById('wishlist'),
         goodsWrapper = document.querySelector('.goods-wrapper'),
-        cart = document.querySelector('.cart');
+        cart = document.querySelector('.cart'),
+        category = document.querySelector('.category');
+
+           
 
         //Создание каточек товаров
         const createCardGoods = (id, title, price, img) => {
@@ -29,18 +32,37 @@ document.addEventListener('DOMContentLoaded', () => {
             return card;
         }
 
-        //карточки товаров
-        goodsWrapper.append(createCardGoods(1, 'Дартс', 2000, 'img/temp/Archer.jpg'));
-        goodsWrapper.append(createCardGoods(2, 'Фламинго', 3000, 'img/temp/Flamingo.jpg'));
-        goodsWrapper.append(createCardGoods(3, 'Носки', 333,'img/temp/Socks.jpg' ));
+        // //карточки товаров
+        // goodsWrapper.append(createCardGoods(1, 'Дартс', 2000, 'img/temp/Archer.jpg'));
+        // goodsWrapper.append(createCardGoods(2, 'Фламинго', 3000, 'img/temp/Flamingo.jpg'));
+        // goodsWrapper.append(createCardGoods(3, 'Носки', 333,'img/temp/Socks.jpg' ));
 
-        //закрытие карзины
+        //вывод товаров витрины
+        const renderCard = (items) => {
+            items.forEach( (item) => {
+                const { id, title, price, imgMin } = item;
+                //добавляем карточку товара
+                goodsWrapper.append(createCardGoods(id, title, price, imgMin));             
+            } );
+        };
+
+        //получение товаров из API
+        const getGoods = (handler, filter) => {
+            fetch('db/db.json')
+                .then((response) => {
+                    return response.json();
+                })
+                .then(filter)
+                .then(handler);
+        };
+
+        //закрытие карзины Окно Крестик ESC
         const closeCart = (event) => {
             const target = event.target;
-            if(target === cart || target.classList.contains('cart-close')) {
-                cart.style.display = 'none'
+            if(target === cart || target.classList.contains('cart-close') || event.keyCode === 27) {
+                cart.style.display = 'none';
             }
-            
+
         };
 
         //открытие карзины
@@ -49,10 +71,40 @@ document.addEventListener('DOMContentLoaded', () => {
             cart.style.display = 'flex';
         };
 
+        //рандом на товары витрины
+        const randomSort = (item) => {
+            return item.sort( () => Math.random() - 0.5 );
+        };
+
+        //выбор категории
+        const choiceCategory = (event) => {
+            event.preventDefault();
+            const target = event.target;
+
+            if( target.classList.contains('category-item') ){
+                const category = target.dataset.category;
+                getGoods(renderCard,  items => items.filter( (item => item.category.includes(category)))
+            }
+                
+            
+
+        }
+                
+        
+
         //обработчик  открытие карзины
         cartBtn.addEventListener('click', openCart );
 
-        //обработчик закрытие закрытие
+        //обработчик закрытие карзины
         cart.addEventListener('click', closeCart);
+
+        //обработчик закрытие карзины ESC
+        document.addEventListener('keyup', closeCart);
+
+        //обработчик выбор категории
+        category.addEventListener('click', choiceCategory);
+
+        //вызов вывод товаров витрины
+        getGoods(renderCard, randomSort);
 
 });
